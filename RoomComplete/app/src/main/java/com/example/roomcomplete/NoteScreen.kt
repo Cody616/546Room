@@ -12,7 +12,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun NoteScreen(viewModel: NoteViewModel) {
     val notes by viewModel.notes.observeAsState(emptyList())
-    var input by remember { mutableStateOf("") }
+    var inputTitle by remember { mutableStateOf("") }
+    var inputText by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.padding(16.dp)
@@ -20,18 +21,28 @@ fun NoteScreen(viewModel: NoteViewModel) {
         Spacer(Modifier.height(32.dp))
 
         OutlinedTextField(
-            value = input,
-            onValueChange = { input = it },
-            label = { Text("New Note") },
+            value = inputTitle,
+            onValueChange = { inputTitle = it },
+            label = { Text("Title") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = inputText,
+            onValueChange = { inputText = it },
+            label = { Text("Note Text") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(8.dp))
 
         Button(onClick = {
-            if (input.isNotBlank()) {
-                viewModel.addNote(input)
-                input = ""
+            if (inputText.isNotBlank() && inputTitle.isNotBlank()) {
+                viewModel.addNote(inputTitle, inputText)
+                inputTitle = ""
+                inputText = ""
             }
         }) {
             Text("Add")
@@ -41,14 +52,29 @@ fun NoteScreen(viewModel: NoteViewModel) {
 
         LazyColumn {
             items(notes) { note ->
-                Text(
-                    text = note.text,
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { viewModel.deleteNote(note) }
-                        .padding(8.dp)
-                )
+                        .padding(vertical = 8.dp)
+                        .clickable { viewModel.deleteNote(note) },
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = note.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = note.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
             }
         }
+
     }
 }
